@@ -14,7 +14,8 @@ ydlidar_ros_driver depends on YDLidar-SDK library. If you have never installed Y
 
 1. Clone ydlidar_ros_driver package for github : 
 
-   `git clone --recursive https://github.com/YDLIDAR/EaiRosForRap.git ydlidar_ws/src/ydlidar_ros_driver`
+   `git clone https://github.com/YDLIDAR/EaiRosForRap.git ydlidar_ws/src/EaiRos`
+   `git clone https://github.com/YDLIDAR/YDLidar-SDK.git ydlidar_ws/src/EaiRos/sdk`
 
 2. Build ydlidar_ros_driver package :
 
