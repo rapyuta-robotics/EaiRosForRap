@@ -143,6 +143,13 @@ int main(int argc, char **argv) {
   nh_private.param<float>("frequency", f_optvalue, 10.f);
   laser.setlidaropt(LidarPropScanFrequency, &f_optvalue, sizeof(float));
 
+  /// unit: m
+  float range_offset = 0.f;
+  nh_private.param<float>("range_offset", range_offset, 0.f);
+  if (range_offset != 0.f) {
+    ROS_INFO_STREAM_NAMED(nh_private.getNamespace(), "NON-ZERO RANGE OFFSET WAS SET: " << range_offset);
+  }
+
   bool invalid_range_is_inf = false;
   nh_private.param<bool>("invalid_range_is_inf", invalid_range_is_inf,
                          invalid_range_is_inf);
@@ -211,19 +218,20 @@ int main(int argc, char **argv) {
         int index = std::ceil((scan.points[i].angle - scan.config.min_angle) /
                               scan.config.angle_increment);
 
+        float range = scan.points[i].range + range_offset;
         if (index >= 0 && index < size) {
-          if (scan.points[i].range >= scan.config.min_range) {
-            scan_msg.ranges[index] = scan.points[i].range;
+          if (range >= scan.config.min_range) {
+            scan_msg.ranges[index] = range;
             scan_msg.intensities[index] = scan.points[i].intensity;
           }
         }
 
         if (point_cloud_preservative ||
-            (scan.points[i].range >= scan.config.min_range &&
-             scan.points[i].range <= scan.config.max_range)) {
+            (range >= scan.config.min_range &&
+             range <= scan.config.max_range)) {
           geometry_msgs::Point32 point;
-          point.x = scan.points[i].range * cos(scan.points[i].angle);
-          point.y = scan.points[i].range * sin(scan.points[i].angle);
+          point.x = range * cos(scan.points[i].angle);
+          point.y = range * sin(scan.points[i].angle);
           point.z = 0.0;
           pc_msg.points.push_back(point);
           pc_msg.channels[idx_intensity].values.push_back(scan.points[i].intensity);
@@ -231,7 +239,7 @@ int main(int argc, char **argv) {
         }
 
 //        fan.angles.push_back(scan.points[i].angle);
-//        fan.ranges.push_back(scan.points[i].range);
+//        fan.ranges.push_back(range);
 //        fan.intensities.push_back(scan.points[i].intensity);
       }
 
